@@ -13,6 +13,11 @@ worker-configuration.d.ts
 # dependencies
 node_modules/
 
+# local preview run (dev server log/pid + review screenshots)
+.preview-shots/
+.preview-dev.log
+.preview-dev.pid
+
 # logs
 npm-debug.log*
 yarn-debug.log*

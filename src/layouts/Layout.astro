@@ -1,9 +1,9 @@
 ---
 import "../styles/global.css";
-import { DATA } from "@/data/resume";
+import { siteContent } from "@/data/site-content";
 import { CONFIG } from "@/data/config";
 import NavbarIsland from "@/components/NavbarIsland";
-import { FlickeringGrid } from "@/components/magicui/flickering-grid";
+import Footer from "@/components/Footer.astro";
 
 interface Props {
   title?: string;
@@ -14,19 +14,16 @@ interface Props {
 
 const {
   title,
-  description = DATA.description,
+  description = siteContent.basics.tagline,
   image,
   canonicalURL = Astro.url.href,
 } = Astro.props;
 
 const pageTitle = title
-  ? CONFIG.seo.titleTemplate.replace("%s", title).replace("%n", DATA.name)
-  : DATA.name;
-const ogImage = image
-  ? image.startsWith("http")
-    ? image
-    : `${CONFIG.site.url}${image}`
-  : `${CONFIG.site.url}${DATA.ogImage}`;
+  ? CONFIG.seo.titleTemplate.replace("%s", title).replace("%n", siteContent.basics.name)
+  : `${siteContent.basics.name} | ${siteContent.basics.title}`;
+const ogImage = image && new URL(image, Astro.url).href;
+const favicon = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2318181b'/%3E%3Ctext x='16' y='22' font-family='system-ui,sans-serif' font-size='18' font-weight='700' fill='white' text-anchor='middle'%3E${siteContent.basics.name.charAt(0)}%3C/text%3E%3C/svg%3E`;
 
 const { light, dark, radius } = CONFIG.theme;
 const { baseFontSize } = CONFIG.typography;
@@ -34,6 +31,7 @@ const { baseFontSize } = CONFIG.typography;
 
 <html
   lang={CONFIG.site.locale.split("_")[0]}
+  class="no-js"
   style={`font-size: ${baseFontSize}%;`}
 >
   <head>
@@ -44,18 +42,21 @@ const { baseFontSize } = CONFIG.typography;
     <!-- FOUC prevention: apply stored theme before first paint -->
     <script is:inline>
       (function () {
+        // Scroll reveals start hidden; drop the no-js guard now that we know
+        // scripts run, so motion can take over the reveal.
+        document.documentElement.classList.remove("no-js");
         try {
+          // Dark by default: only an explicit stored "light" opts out. Must
+          // match ThemeProvider's defaultTheme in NavbarIsland.tsx.
           var theme = localStorage.getItem("theme");
-          if (
-            theme === "dark" ||
-            (!theme &&
-              window.matchMedia("(prefers-color-scheme: dark)").matches)
-          ) {
-            document.documentElement.classList.add("dark");
-          } else {
+          if (theme === "light") {
             document.documentElement.classList.remove("dark");
+          } else {
+            document.documentElement.classList.add("dark");
           }
-        } catch (_) {}
+        } catch (_) {
+          document.documentElement.classList.add("dark");
+        }
       })();
     </script>
 
@@ -82,6 +83,8 @@ const { baseFontSize } = CONFIG.typography;
         --border: ${light.border};
         --input: ${light.input};
         --ring: ${light.ring};
+        --brand: ${light.brand};
+        --brand-foreground: ${light.brandForeground};
       }
       .dark {
         --background: ${dark.background};
@@ -102,13 +105,19 @@ const { baseFontSize } = CONFIG.typography;
         --border: ${dark.border};
         --input: ${dark.input};
         --ring: ${dark.ring};
+        --brand: ${dark.brand};
+        --brand-foreground: ${dark.brandForeground};
       }
     `}
     ></style>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href={favicon}
+      aria-label={`${siteContent.basics.name} favicon`}
+    />
 
     <!-- Primary meta -->
     <title>{pageTitle}</title>
@@ -127,37 +136,46 @@ const { baseFontSize } = CONFIG.typography;
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:site_name" content={DATA.name} />
+    <meta property="og:site_name" content={siteContent.basics.name} />
     <meta property="og:locale" content={CONFIG.site.locale} />
-    <meta property="og:image" content={ogImage} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
 
     <!-- Twitter -->
     <meta name="twitter:card" content={CONFIG.seo.twitterCard} />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
   </head>
-  <body class="min-h-screen bg-background font-sans antialiased relative">
-    <!-- FlickeringGrid header background - matches template exactly -->
-    <div class="absolute inset-0 top-0 left-0 right-0 h-25 overflow-hidden z-0">
-      <FlickeringGrid
-        client:load
-        className="h-full w-full"
-        squareSize={2}
-        gridGap={2}
-        style={{
-          maskImage: "linear-gradient(to bottom, black, transparent)",
-          WebkitMaskImage: "linear-gradient(to bottom, black, transparent)",
-        }}
-      />
-    </div>
+  <body class="relative min-h-screen bg-background font-sans antialiased">
+    <!-- Shell: rail + reading column are one composition, capped at
+         `max-w-shell` and centred by `mx-auto`, so an ultrawide viewport gets
+         equal margins instead of a page pinned to the left edge. Stacks to a
+         single column below `lg`. -->
+    <div class="mx-auto flex w-full max-w-shell flex-col lg:flex-row">
+      <!-- The island gets its own flex item so the rail owns a track in the
+           row regardless of the wrapper element Astro emits for the React
+           root; the sidebar itself sticks inside this full-height track. -->
+      <div class="w-full lg:w-[19rem] lg:shrink-0">
+        <!-- Sidebar: ThemeProvider + TooltipProvider + Sidebar in one React island. -->
+        <NavbarIsland client:load />
+      </div>
 
-    <!-- Main content wrapper - matches template's z-10 container exactly -->
-    <div class="relative z-10 max-w-2xl mx-auto py-12 pb-24 sm:py-24 px-6">
-      <slot />
-    </div>
+      <div class="relative min-w-0 flex-1">
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-x-0 top-0 h-96"
+          style="background: radial-gradient(70% 100% at 30% 0%, color-mix(in oklch, var(--brand) 8%, transparent), transparent 70%);"
+        >
+        </div>
 
-    <!-- Navbar: ThemeProvider + TooltipProvider + Navbar all in one React island -->
-    <NavbarIsland client:load />
+        <div
+          id="top"
+          class="relative z-10 px-6 py-14 sm:px-10 sm:py-16 lg:px-12 lg:py-20 xl:px-16 xl:py-24"
+        >
+          <slot />
+          <Footer />
+        </div>
+      </div>
+    </div>
   </body>
 </html>

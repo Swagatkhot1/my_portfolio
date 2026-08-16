@@ -5,5 +5,7 @@ import HomePage from "@/components/HomePage";
 ---
 
 <Layout>
-  <HomePage client:only="react" />
+  <!-- client:load (not client:only) so the content ships in the server HTML
+       for crawlers and renders before hydration. -->
+  <HomePage client:load />
 </Layout>

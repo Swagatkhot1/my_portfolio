@@ -3,46 +3,22 @@ import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
-import mdx from '@astrojs/mdx';
-import sitemap from '@astrojs/sitemap';
-import remarkGfm from 'remark-gfm';
-import rehypePrettyCode from 'rehype-pretty-code';
-import { remarkCodeMeta } from './src/lib/remark-code-meta.ts';
-import { CONFIG } from './src/data/config.ts';
 
-/** @type {import('rehype-pretty-code').Options} */
-const prettyCodeOptions = {
-  theme: {
-    light: 'github-light',
-    dark: 'github-dark',
-  },
-  keepBackground: false,
-};
+// Local `astro dev` skips the Cloudflare Workerd runner. That runner crashes
+// with `module is not defined` (CommonJS `module` in an ESM Worker). Pages are
+// already prerendered, so Vite on Node is enough for local preview. Build and
+// preview still use the Cloudflare adapter.
+const localDev = process.argv.includes('dev');
 
 // https://astro.build/config
 export default defineConfig({
-  site: CONFIG.site.url,
-  output: 'server',
+  output: localDev ? 'static' : 'server',
 
-  adapter: cloudflare(),
+  adapter: localDev ? undefined : cloudflare(),
 
   vite: {
     plugins: [tailwindcss()],
   },
 
-  integrations: [
-    react(),
-    mdx({
-      remarkPlugins: [remarkGfm, remarkCodeMeta],
-      rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
-      syntaxHighlight: false,
-    }),
-    sitemap(),
-  ],
-
-  markdown: {
-    syntaxHighlight: false,
-    remarkPlugins: [remarkGfm, remarkCodeMeta],
-    rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
-  },
+  integrations: [react()],
 });

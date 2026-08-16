@@ -1,0 +1,49 @@
+---
+import { siteContent } from "@/data/site-content";
+
+const { basics } = siteContent;
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-28 border-t border-border pt-8 pb-4">
+  <div
+    class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <p
+      class="font-mono text-label uppercase tracking-[0.14em] text-muted-foreground"
+    >
+      © {year} {basics.name}
+    </p>
+    <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+      {
+        basics.links.map((link) => (
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-mono text-label uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+      <a
+        href={`mailto:${basics.email}`}
+        class="font-mono text-label uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+      >
+        Email
+      </a>
+      <a
+        href="#top"
+        class="font-mono text-label uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-foreground"
+      >
+        Back to top ↑
+      </a>
+    </div>
+  </div>
+  <p
+    class="mt-6 font-mono text-label uppercase tracking-[0.14em] text-muted-foreground/60"
+  >
+    Built with Astro, React &amp; Tailwind
+  </p>
+</footer>

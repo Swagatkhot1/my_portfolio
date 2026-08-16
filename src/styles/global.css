@@ -1,18 +1,53 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
-@import "@fontsource-variable/outfit";
-@import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/newsreader/wght-italic.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Layout shell: the nav rail and the reading column are capped together as
+     one composition so wide monitors get balanced margins on both sides rather
+     than a single gutter on the right. Sized as rail + column + gutters. Note
+     the root font-size is scaled by CONFIG.typography.baseFontSize, so 1rem
+     here is larger than 16px. */
+  --container-shell: 67rem;
+  /* Measure for long-form copy: ~70 characters. Set in `em` so it tracks the
+     font-size of whichever block it caps, rather than only the body size. */
+  --container-measure: 30em;
+  /* Editorial label scale: the mono, uppercase, wide-tracked micro-copy used
+     for section numbers, dates, tags and the nav rail. These were written as
+     literal px, which opted them out of the root scaling in
+     CONFIG.typography.baseFontSize — they stayed at 9-11px no matter how large
+     the rest of the page was set. In rem they track that setting. The bundled
+     tracking is only a default; a `tracking-*` utility on the element wins. */
+  --text-label-sm: 0.68rem;
+  --text-label-sm--line-height: 1.45;
+  --text-label-sm--letter-spacing: 0.1em;
+  --text-label: 0.74rem;
+  --text-label--line-height: 1.45;
+  --text-label--letter-spacing: 0.11em;
+  --text-label-lg: 0.82rem;
+  --text-label-lg--line-height: 1.4;
+  --text-label-lg--letter-spacing: 0.12em;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: 'Outfit Variable', sans-serif;
-  --font-mono: 'Geist Mono Variable', monospace;
+  /* Geist is a neutral grotesque: it carries the UI text and the long bullets
+     without competing with the serif display face, and its mono cousin's
+     proportions are matched closely enough by JetBrains Mono that the tracked
+     micro-labels keep the same advance width. */
+  --font-sans: 'Geist Variable', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', monospace;
+  /* Newsreader is a text-first serif rather than a display one, so headings,
+     ledes and pull-quotes stay readable at the sizes this layout sets them. */
+  --font-serif: 'Newsreader Variable', 'Iowan Old Style', Georgia, serif;
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -47,25 +82,27 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --radius: 0.5rem;
+  --background: oklch(0.9875 0.0035 92);
+  --foreground: oklch(0.205 0.008 60);
+  --card: oklch(0.9975 0.0015 92);
+  --card-foreground: oklch(0.205 0.008 60);
+  --popover: oklch(0.9975 0.0015 92);
+  --popover-foreground: oklch(0.205 0.008 60);
+  --primary: oklch(0.245 0.01 58);
+  --primary-foreground: oklch(0.985 0.003 92);
+  --secondary: oklch(0.955 0.005 88);
+  --secondary-foreground: oklch(0.245 0.01 58);
+  --muted: oklch(0.955 0.005 88);
+  --muted-foreground: oklch(0.505 0.012 65);
+  --accent: oklch(0.945 0.008 85);
+  --accent-foreground: oklch(0.245 0.01 58);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.885 0.006 85);
+  --input: oklch(0.885 0.006 85);
+  --ring: oklch(0.505 0.135 46);
+  --brand: oklch(0.505 0.135 46);
+  --brand-foreground: oklch(0.985 0.003 92);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -82,24 +119,26 @@
 }
 
 .dark {
-  --background: oklch(0.18 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.16 0.008 62);
+  --foreground: oklch(0.955 0.005 88);
+  --card: oklch(0.198 0.009 62);
+  --card-foreground: oklch(0.955 0.005 88);
+  --popover: oklch(0.198 0.009 62);
+  --popover-foreground: oklch(0.955 0.005 88);
+  --primary: oklch(0.93 0.006 88);
+  --primary-foreground: oklch(0.198 0.009 62);
+  --secondary: oklch(0.255 0.01 62);
+  --secondary-foreground: oklch(0.955 0.005 88);
+  --muted: oklch(0.255 0.01 62);
+  --muted-foreground: oklch(0.715 0.012 75);
+  --accent: oklch(0.255 0.01 62);
+  --accent-foreground: oklch(0.955 0.005 88);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(1 0 0 / 11%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.755 0.135 58);
+  --brand: oklch(0.755 0.135 58);
+  --brand-foreground: oklch(0.185 0.009 62);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -122,6 +161,54 @@
 
   body {
     @apply bg-background text-foreground;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  ::selection {
+    background: color-mix(in oklch, var(--brand) 24%, transparent);
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Newsreader sits lighter and wider than the display serif it replaced, so
+     the optical pull-in is gentler and the weight is nudged up — at 400 the
+     large headings read thin against the body sans. */
+  .font-serif {
+    font-weight: 450;
+    letter-spacing: -0.006em;
+    font-feature-settings: "liga" 1, "kern" 1;
+  }
+
+  /* Motion reveals start at opacity 0. Without JS they would never resolve,
+     so force everything visible when scripts are unavailable. */
+  .no-js [style*="opacity"] {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
   }
 
   /* Shiki dual theme support */
