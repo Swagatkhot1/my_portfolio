@@ -4,7 +4,7 @@ import type { Education } from "../schema";
 export const education = [
   {
     school: "The University of Tennessee at Knoxville",
-    degree: "Bachelor of Science, Computer Engineering",
+    degree: "Bachelor of Science, Computer Science",
     standing: "Sophomore",
     gpa: "3.81 / 4.00",
     logo: "/logos/ut-tennessee-t.png",
