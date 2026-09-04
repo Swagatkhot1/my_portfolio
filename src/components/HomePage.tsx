@@ -8,6 +8,7 @@ import {
   TimelineConnectItem,
 } from "@/components/timeline";
 import { sectionIndex } from "@/lib/sections";
+import { withBase } from "@/lib/base";
 import { Icons, type IconProps } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { ArrowUpRight, ChevronDown, Mail } from "lucide-react";
@@ -320,7 +321,7 @@ function ImageGallery({ images }: { images: { src: string; alt: string }[] }) {
       {images.map((image) => (
         <img
           key={image.src}
-          src={image.src}
+          src={withBase(image.src)}
           alt={image.alt}
           loading="lazy"
           className="h-auto w-full max-w-full rounded-md border border-border object-cover"
@@ -496,7 +497,7 @@ function EntryRow({
       <TimelineConnectItem className="flex items-start justify-center">
         {"logo" in entry && entry.logo ? (
           <img
-            src={entry.logo}
+            src={withBase(entry.logo)}
             alt={entry.logoAlt ?? `${entry.org} logo`}
             className="z-10 size-11 shrink-0 flex-none overflow-hidden rounded-full border border-border bg-white object-contain p-1.5 ring-4 ring-background"
           />
@@ -629,8 +630,8 @@ function ProjectCover({
   if (project.video) {
     return (
       <video
-        src={project.video.src}
-        poster={project.video.poster}
+        src={withBase(project.video.src)}
+        poster={withBase(project.video.poster)}
         autoPlay
         loop
         muted
@@ -644,7 +645,7 @@ function ProjectCover({
   if (cover) {
     return (
       <img
-        src={cover.src}
+        src={withBase(cover.src)}
         alt={cover.alt}
         loading="lazy"
         className={cn("w-full object-cover", className)}
@@ -861,7 +862,7 @@ export default function HomePage() {
                   <div className="flex min-w-0 items-start gap-4">
                     {entry.logo && (
                       <img
-                        src={entry.logo}
+                        src={withBase(entry.logo)}
                         alt={entry.logoAlt ?? `${entry.school} logo`}
                         className="size-11 shrink-0 rounded-full border border-border bg-white object-contain p-1.5"
                       />
